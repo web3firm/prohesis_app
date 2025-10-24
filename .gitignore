@@ -18,6 +18,7 @@ target/
 # Go
 bin/
 vendor/
+prohesis-api
 
 # Python
 __pycache__/
