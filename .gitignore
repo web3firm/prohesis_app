@@ -1,0 +1,39 @@
+# Node
+node_modules/
+.npm/
+.next/
+out/
+dist/
+.yarn/
+.pnp.*
+.coverage/
+.cache/
+.vscode/
+*.log
+*.tsbuildinfo
+
+# Rust
+target/
+
+# Go
+bin/
+vendor/
+prohesis-api
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Foundry
+out/
+cache/
+lib/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Misc
+.DS_Store
