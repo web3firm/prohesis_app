@@ -27,6 +27,7 @@ __pycache__/
 # Foundry
 out/
 cache/
+lib/
 
 # Env
 .env
