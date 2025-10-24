@@ -1,0 +1,86 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: prohesis-postgres
+    environment:
+      POSTGRES_USER: prohesis
+      POSTGRES_PASSWORD: prohesis
+      POSTGRES_DB: prohesis
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prohesis"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: prohesis-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
+    container_name: prohesis-anvil
+    command: anvil --host 0.0.0.0 --chain-id 31337
+    ports:
+      - "8545:8545"
+
+  core:
+    build:
+      context: ./core
+      dockerfile: Dockerfile
+    container_name: prohesis-core
+    environment:
+      DATABASE_URL: postgres://prohesis:prohesis@postgres:5432/prohesis
+      REDIS_URL: redis://redis:6379
+      BASE_SEPOLIA_RPC_URL: ${BASE_SEPOLIA_RPC_URL:-https://sepolia.base.org}
+    ports:
+      - "7070:7070"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: prohesis-api
+    environment:
+      DATABASE_URL: postgres://prohesis:prohesis@postgres:5432/prohesis
+      REDIS_URL: redis://redis:6379
+      CORE_URL: http://core:7070
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+      - core
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: prohesis-web
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+      NEXT_PUBLIC_WEB3AUTH_CLIENT_ID: ${NEXT_PUBLIC_WEB3AUTH_CLIENT_ID}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:

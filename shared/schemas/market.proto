@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package prohesis;
+
+message Market {
+  string id = 1;
+  string question = 2;
+  int64 end_time = 3;
+  string volume = 4;
+  bool resolved = 5;
+  optional uint32 winning_outcome = 6;
+  repeated string outcomes = 7;
+}
+
+message CreateMarketRequest {
+  string question = 1;
+  int64 end_time = 2;
+  repeated string outcomes = 3;
+}
+
+message GetMarketsRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+}
+
+message GetMarketsResponse {
+  repeated Market markets = 1;
+  int32 total_count = 2;
+}
